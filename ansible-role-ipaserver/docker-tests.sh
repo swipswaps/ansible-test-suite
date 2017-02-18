@@ -33,7 +33,7 @@ run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
 ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 ) 
-ansible_version=2.2.0.0 #2.2.1.0 #once block issue fixed
+ansible_version=2.2.0.0 #latest #once block issue fixed with 2.2.1
 
 main() {
   configure_env
@@ -58,22 +58,22 @@ main() {
 
 configure_env() {
 
-  case "${distribution}${version}-multi" in
-    'centos7-multi')
+  case "${distribution}${version}" in
+    'centos7')
       init=/usr/lib/systemd/systemd
       run_opts+=('--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro')
       ;;
-    'fedora25-multi')
+    'fedora25')
       init=/usr/lib/systemd/systemd
       run_opts+=('--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro')
       ;;
-    'ubuntu14.04-multi')
+    'ubuntu14.04')
       # Workaround for issue when the host operating system has SELinux
       if [ -x '/usr/sbin/getenforce' ]; then
         run_opts+=('--volume=/sys/fs/selinux:/sys/fs/selinux:ro')
       fi
       ;;
-    'ubuntu16.04-multi')
+    'ubuntu16.04')
       run_opts=('--volume=/run' '--volume=/run/lock' '--volume=/tmp' '--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro' '--cap-add=SYS_ADMIN' '--cap-add=SYS_RESOURCE')
 
       if [ -x '/usr/sbin/getenforce' ]; then
@@ -85,7 +85,7 @@ configure_env() {
 
 # Usage: build_container
 build_container() {
-  docker build --tag="${docker_image}:${distribution}${version}-multi" 
+  docker build --tag="${docker_image}:${distribution}${version}" 
 }
 
 start_container() {
@@ -94,7 +94,7 @@ start_container() {
   docker run --detach --tty \
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
-    "${docker_image}:${distribution}${version}-multi" \
+    "${docker_image}:${distribution}${version}" \
     "${init}"  \
     > "${container_id}"
   set +x
