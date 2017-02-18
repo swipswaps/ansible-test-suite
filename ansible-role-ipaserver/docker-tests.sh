@@ -11,7 +11,7 @@
 # abort on nonzero exitstatus
 set -o errexit
 # abort on unbound variable
-set -o nounset
+# set -o nounset
 # don't hide errors within pipes
 set -o pipefail
 #}}}
@@ -32,19 +32,22 @@ run_opts=("--privileged")
 #}}}
 
 # Supported versions of ansible stable releases
-ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 ) #2.2.1.0
-ansible_version=2.2.0.0
+ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 ) 
+ansible_version=2.2.0.0 #2.2.1.0 #once block issue fixed
 
 main() {
   configure_env
 
   start_container
 
+  run_syntax_check 
+
+  run_playbook 
+
+  # Running Playbook on older stable ansible versions
   for ansible_version in "${ansible_versions[@]}"
   do
-    run_syntax_check 
-
-    run_playbook 
+    log "Working on ansible verions : $ansible_version"
 
     run_idempotence_test 
   done
@@ -55,7 +58,7 @@ main() {
 
 configure_env() {
 
-  case "${distribution}_${version}" in
+  case "${distribution}${version}-multi" in
     'centos7-multi')
       init=/usr/lib/systemd/systemd
       run_opts+=('--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro')
@@ -82,17 +85,17 @@ configure_env() {
 
 # Usage: build_container
 build_container() {
-  docker build --tag="${docker_image}:${distribution}_${version}" 
+  docker build --tag="${docker_image}:${distribution}${version}-multi" 
 }
 
 start_container() {
   log "Starting container"
   set -x
-  docker run --detach \
+  docker run --detach --tty \
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
-    "${docker_image}:${distribution}_${version}" \
-    "${init}" \
+    "${docker_image}:${distribution}${version}-multi" \
+    "${init}"  \
     > "${container_id}"
   set +x
 }
@@ -116,8 +119,7 @@ exec_container() {
   set -x
   docker exec --tty \
     "${id}" \
-    env TERM=xterm \
-    "source ~/.bashrc && workon ansible_${ansible_version} && ${@}"
+    bash -c "source ~/.bashrc ; workon ansible_${ansible_version} ; ${@} "
   set +x
 }
 
