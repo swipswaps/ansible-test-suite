@@ -119,7 +119,7 @@ exec_container() {
   set -x
   docker exec --tty \
     "${id}" \
-    bash -c "source ~/.bashrc ; workon ansible_${ansible_version} ; ${@} "
+    bash -c 'source ~/.bashrc ; workon ansible_${ansible_version} ; ${@} '
   set +x
 }
 
