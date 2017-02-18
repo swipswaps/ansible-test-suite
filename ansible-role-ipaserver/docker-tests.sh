@@ -125,7 +125,7 @@ exec_container() {
 
 run_syntax_check() {
   log "Running syntax check on playbook"
-  exec_container ansible-playbook "${test_playbook}" --syntax-check
+  exec_container ansible-playbook ${test_playbook} --syntax-check
 }
 
 run_playbook() {
