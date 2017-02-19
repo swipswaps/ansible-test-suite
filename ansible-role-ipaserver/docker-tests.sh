@@ -166,7 +166,7 @@ run_functional_test() {
   log "Running IPA server functional tests"
   exec_container "ipactl status"
   exec_container "ipa user-find admin"
-  exec_container "ipa user-add testlab --first=testlab --last=user --password "
+  exec_container "ipa user-add testlab --first=testlab --last=user "
   exec_container "ipa user-show testlab"
   exec_container "ipa user-del testlab"
 }
