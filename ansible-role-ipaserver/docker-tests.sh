@@ -11,7 +11,7 @@
 # abort on nonzero exitstatus
 set -o errexit
 # abort on unbound variable
-# set -o nounset
+set -o nounset
 # don't hide errors within pipes
 set -o pipefail
 #}}}
@@ -29,16 +29,20 @@ readonly docker_image="yabhinav/ansible"
 # Distribution specific settings
 init="/sbin/init"
 run_opts=("--privileged")
-#}}}
 
 # Supported versions of ansible stable releases
-ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 ) 
-ansible_version=2.2.0.0 #latest #once block issue fixed with 2.2.1
+readonly ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 ) 
+#latest #once block issue fixed with 2.2.1
+ansible_version=latest 
+
+#}}}
+
+
 
 main() {
   configure_env
 
-  start_container
+  start_container 
 
   run_syntax_check 
 
@@ -47,10 +51,10 @@ main() {
   # Running Playbook on older stable ansible versions
   for ansible_version in "${ansible_versions[@]}"
   do
-    log "Working on ansible verions : $ansible_version"
-
     run_idempotence_test 
   done
+
+  run_functional_test
 
 }
 
@@ -93,10 +97,12 @@ start_container() {
   set -x
   docker run --detach --tty \
     --volume="${PWD}:${role_dir}:ro" \
+    -h testlab.example.com \
     "${run_opts[@]}" \
     "${docker_image}:${distribution}${version}" \
     "${init}"  \
     > "${container_id}"
+  exec_container "hostname"
   set +x
 }
 
@@ -115,31 +121,33 @@ get_container_ip() {
 
 exec_container() {
   id="$(get_container_id)"
-
   set -x
   docker exec --tty \
     "${id}" \
-    bash -c 'source ~/.bashrc ; workon ansible_${ansible_version} ; ${@} '
+    bash -c "${@}"
   set +x
 }
 
 run_syntax_check() {
   log "Running syntax check on playbook"
-  exec_container ansible-playbook ${test_playbook} --syntax-check
+  log "Working on ansible version : ${ansible_version}"
+  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook} --syntax-check "
 }
 
 run_playbook() {
   log "Running playbook"
-  exec_container ansible-playbook "${test_playbook}"
+  log "Working on ansible version : ${ansible_version}"
+  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}; exit"
   log "Run finished"
 }
 
 run_idempotence_test() {
   log "Running idempotence test"
+  log "Working on ansible version : ${ansible_version}"
   local output
   output="$(mktemp)"
 
-  exec_container ansible-playbook "${test_playbook}" 2>&1 | tee "${output}"
+  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}" 2>&1 | tee "${output}"
 
   if grep -q 'changed=0.*failed=0' "${output}"; then
     result='pass'
@@ -154,6 +162,15 @@ run_idempotence_test() {
   return "${return_status}"
 }
 
+run_functional_test() {
+  log "Running IPA server functional tests"
+  exec_container "ipactl status"
+  exec_container "ipa user-find admin"
+  exec_container "ipa user-add testlab --first=testlab --last=user --password "
+  exec_container "ipa user-show testlab"
+  exec_container "ipa user-del testlab"
+}
+
 cleanup() {
   log "Cleaning up"
   id="$(get_container_id)"
@@ -162,28 +179,8 @@ cleanup() {
   docker rm "${id}"
   rm "${container_id}"
 }
+trap cleanup EXIT INT ERR HUP TERM
 
-# Check if command line arguments are valid
-check_args() {
-  if [ "${#}" -ne "1" ]; then
-    echo "Expected 1 argument, got ${#}" >&2
-    usage
-    exit 2
-  fi
-}
-
-# Print usage message on stdout
-usage() {
-cat << _EOF_
-Usage: ${script_name} [OPTIONS]... [ARGS]...
-
-  Creates a Docker container, installs this role, and runs tests.
-
-OPTIONS:
-
-EXAMPLES:
-_EOF_
-}
 
 log() {
   local yellow='\e[0;33m'
@@ -194,6 +191,4 @@ log() {
 
 #}}}
 
-main "${@}"
-
-#trap cleanup EXIT INT ERR HUP TERM
+main 

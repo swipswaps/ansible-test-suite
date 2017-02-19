@@ -162,8 +162,9 @@ Use this [.travis.yml](#the-same-test-case-using-this-test-suite) as a guide, it
 1. Set the environmental variables for docker test on centOS6 and ansible-role-ipaserver
   `export distribution=centos; export version=6;`
 
-2. Link your role as role_under_test 
-  `ln -s ~/code/MyProjects/ansible-galaxy-roles/ansible-role-ipaserver  /etc/ansible/roles/role_under_test`
+2. Go to your repo directory and clone the test suite
+    - 'git clone --depth 1 https://github.com/yabhinav/ansible-test-suite'
+    - 'mv ansible-test-suite/$rolename/* . &&  rm -rf ansible-test-suite '
 
 3. Execute the test script on the container 
   `docker exec -d ansible_bash ./test.sh`
