@@ -163,11 +163,12 @@ Use this [.travis.yml](#the-same-test-case-using-this-test-suite) as a guide, it
   `export distribution=centos; export version=6;`
 
 2. Go to your repo directory and clone the test suite
-    - 'git clone --depth 1 https://github.com/yabhinav/ansible-test-suite'
-    - 'mv ansible-test-suite/$rolename/* . &&  rm -rf ansible-test-suite '
+  `   ~/code/MyProjects/ansible-galaxy-roles/ansible-role-ipaserver        ` 
+  ``  git clone --depth 1 https://github.com/yabhinav/ansible-test-suite  ``
+  ``` mv ansible-test-suite/$rolename/* . &&  rm -rf ansible-test-suite  ```
 
 3. Execute the test script on the container 
-  `docker exec -d ansible_bash ./test.sh`
+  `/bin/bash docker-tests.sh`
 
 ### Vagrant
 
@@ -177,7 +178,7 @@ Similar to docker but we will use docker images and ansible instead of test scri
   `ln -s ~/code/MyProjects/ansible-galaxy-roles/ansible-role-ipaserver  /etc/ansible/roles/role_under_test`
 
 2. Run the following command from the [ansible-test-suite](https://github.com/yabhinav/ansible-test-suite) :
-  ` vagrant --rolename ansible-role-ipaserver --hostname testlab.example.com up `
+  ` vagrant --hostname testlab.example.com up `
 
 
 ## License
