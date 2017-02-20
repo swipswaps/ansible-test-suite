@@ -97,12 +97,15 @@ start_container() {
   set -x
   docker run --detach --tty \
     --volume="${PWD}:${role_dir}:ro" \
-    -h testlab.example.com \
+    -h "testlab.example.com" \
     "${run_opts[@]}" \
     "${docker_image}:${distribution}${version}" \
     "${init}"  \
     > "${container_id}"
-  exec_container "hostname"
+  exec_container "hostname -f"
+  exec_container "hostname -d"
+  exec_container "hostname -s"
+  exec_container "cat /etc/hosts"
   set +x
 }
 
