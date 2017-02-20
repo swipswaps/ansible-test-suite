@@ -115,7 +115,6 @@ debug_facts(){
   exec_container "hostname -s"
   exec_container "cat /etc/hosts"
   exec_container "source ~/.bashrc; workon ansible_${ansible_version}; ansible all -m setup; exit"
-  exec_container "yum install hostname"
   exec_container "cat /etc/sysconfig/network"
   set +x
 }
