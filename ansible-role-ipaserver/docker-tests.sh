@@ -114,7 +114,7 @@ debug_facts(){
   exec_container "hostname -d"
   exec_container "hostname -s"
   exec_container "cat /etc/hosts"
-  exec_container "source ~/.bashrc; workon ansible_${ansible_version}; ansible all -m setup; exit"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible all -m setup && deactivate"
   exec_container "cat /etc/sysconfig/network"
   set +x
 }
@@ -144,14 +144,28 @@ exec_container() {
 run_syntax_check() {
   log "Running syntax check on playbook"
   log "Working on ansible version : ${ansible_version}"
-  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook} --syntax-check "
+  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate"
 }
 
 run_playbook() {
   log "Running playbook"
   log "Working on ansible version : ${ansible_version}"
-  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}"
-  log "Run finished"
+  local output
+  output="$(mktemp)"
+
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate"
+
+  if grep -q 'unreachable=0.*changed' "${output}"; then
+    result='pass'
+    return_status=0
+  else
+    result='fail'
+    return_status=1
+  fi
+  rm "${output}"
+
+  log "Result: ${result}"
+  return "${return_status}"
 }
 
 run_idempotence_test() {
@@ -160,9 +174,9 @@ run_idempotence_test() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}" 2>&1 | tee "${output}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate" 2>&1 | tee "${output}"
 
-  if grep -q 'changed=0.*failed=0' "${output}"; then
+  if grep -q 'unreachable=0.*changed=0.*failed=0' "${output}"; then
     result='pass'
     return_status=0
   else
