@@ -44,6 +44,8 @@ main() {
 
   start_container 
 
+  debug_facts
+
   run_syntax_check 
 
   run_playbook 
@@ -102,10 +104,17 @@ start_container() {
     "${docker_image}:${distribution}${version}" \
     "${init}"  \
     > "${container_id}"
+  set +x
+}
+
+debug_facts(){
+  log "Debugging System and Ansible facts"
+  set -x
   exec_container "hostname -f"
   exec_container "hostname -d"
   exec_container "hostname -s"
   exec_container "cat /etc/hosts"
+  exec_container "source ~/.bashrc; workon ansible_2.2.0.0; ansible all -m setup; exit"
   set +x
 }
 
