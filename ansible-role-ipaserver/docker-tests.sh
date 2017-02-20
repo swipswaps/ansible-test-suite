@@ -44,7 +44,7 @@ main() {
 
   start_container 
 
-  debug_facts
+  # debug_facts
 
   run_syntax_check 
 
