@@ -150,7 +150,7 @@ run_syntax_check() {
 run_playbook() {
   log "Running playbook"
   log "Working on ansible version : ${ansible_version}"
-  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}; exit"
+  exec_container "source ~/.bashrc ; workon ansible_${ansible_version} ; ansible-playbook ${test_playbook}"
   log "Run finished"
 }
 
