@@ -97,7 +97,7 @@ build_container() {
 start_container() {
   log "Starting container"
   set -x
-  docker run --detach --tty \
+  docker run --detach  \
     --volume="${PWD}:${role_dir}:ro" \
     -h "testlab.example.com" \
     "${run_opts[@]}" \
@@ -135,7 +135,7 @@ get_container_ip() {
 exec_container() {
   id="$(get_container_id)"
   set -x
-  docker exec --tty \
+  docker exec  \
     "${id}" \
     bash -c "${@}"
   set +x
@@ -153,9 +153,9 @@ run_playbook() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit" 2>&1 | tee "${output}"
 
-  if grep -q 'unreachable=0.*changed' "${output}"; then
+  if grep -q '*changed=.*unreachable=0.*failed=' "${output}"; then
     result='pass'
     return_status=0
   else
@@ -176,7 +176,7 @@ run_idempotence_test() {
 
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit" 2>&1 | tee "${output}"
 
-  if grep -q 'unreachable=0.*changed=0.*failed=0' "${output}"; then
+  if grep -q '*changed=0.*unreachable=0.*failed=0' "${output}"; then
     result='pass'
     return_status=0
   else
