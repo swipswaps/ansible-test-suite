@@ -97,7 +97,7 @@ build_container() {
 start_container() {
   log "Starting container"
   set -x
-  docker run --detach  \
+  docker run --detach --tty  \
     -h "testlab.example.com" \
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
