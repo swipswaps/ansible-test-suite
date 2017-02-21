@@ -97,7 +97,7 @@ build_container() {
 start_container() {
   log "Starting container"
   set -x
-  docker run --detach --tty  \
+  docker run --detach  \
     -h "testlab.example.com" \
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
@@ -135,7 +135,7 @@ get_container_ip() {
 exec_container() {
   id="$(get_container_id)"
   set -x
-  docker exec -it \
+  docker exec \
     "${id}" \
     bash -ic "${@}"
   set +x
