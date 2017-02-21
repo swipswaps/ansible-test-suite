@@ -135,16 +135,16 @@ get_container_ip() {
 exec_container() {
   id="$(get_container_id)"
   set -x
-  docker exec  \
+  docker exec -it \
     "${id}" \
-    bash -c "${@}"
+    bash -ic "${@}"
   set +x
 }
 
 run_syntax_check() {
   log "Running syntax check on playbook"
   log "Working on ansible version : ${ansible_version}"
-  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate && exit"
+  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate ; (exit \$?)"
 }
 
 run_playbook() {
@@ -153,7 +153,7 @@ run_playbook() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit" 2>&1 | tee "${output}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
   if grep -q 'changed=.*failed=0' "${output}"; then
     result='pass'
@@ -174,7 +174,7 @@ run_idempotence_test() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit" 2>&1 | tee "${output}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
   if grep -q 'changed=0.*failed=0' "${output}"; then
     result='pass'
