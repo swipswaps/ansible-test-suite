@@ -144,7 +144,7 @@ exec_container() {
 run_syntax_check() {
   log "Running syntax check on playbook"
   log "Working on ansible version : ${ansible_version}"
-  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate"
+  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate && exit"
 }
 
 run_playbook() {
@@ -153,7 +153,7 @@ run_playbook() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit"
 
   if grep -q 'unreachable=0.*changed' "${output}"; then
     result='pass'
@@ -174,7 +174,7 @@ run_idempotence_test() {
   local output
   output="$(mktemp)"
 
-  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate" 2>&1 | tee "${output}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate && exit" 2>&1 | tee "${output}"
 
   if grep -q 'unreachable=0.*changed=0.*failed=0' "${output}"; then
     result='pass'
