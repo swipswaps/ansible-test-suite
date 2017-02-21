@@ -102,7 +102,6 @@ start_container() {
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
     "${docker_image}:${distribution}${version}" \
-    "${init}"  \
     > "${container_id}"
   set +x
 }
