@@ -137,7 +137,7 @@ exec_container() {
   set -x
   docker exec \
     "${id}" \
-    bash -ic "${@}"
+    bash -ilc "${@}"
   set +x
 }
 
