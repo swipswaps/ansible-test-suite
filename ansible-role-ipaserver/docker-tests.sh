@@ -45,6 +45,7 @@ main() {
   start_container 
 
   # debug_facts
+  run_freeipa_installer #for Debian
 
   run_syntax_check 
 
@@ -137,8 +138,16 @@ exec_container() {
   set -x
   docker exec \
     "${id}" \
-    bash -lc "${@}"
+    bash -c "${@}"
   set +x
+}
+
+# FreeIPA has issue executing install over virtualenvwrapper
+# due to debian is non-interactive but still --configure is triggered for freeipa as if in interactive mode
+run_freeipa_installer(){
+  if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
+        exec_container "apt-get update && apt-get -y install freeipa-server" >> /dev/null
+  fi
 }
 
 run_syntax_check() {
@@ -152,7 +161,7 @@ run_playbook() {
   log "Working on ansible version : ${ansible_version}"
   local output
   output="$(mktemp)"
-
+  
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
   if grep -q 'changed=.*failed=0' "${output}"; then
