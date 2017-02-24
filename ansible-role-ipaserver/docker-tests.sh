@@ -45,7 +45,7 @@ main() {
   start_container 
 
   # debug_facts
-  # run_freeipa_installer #for Debian
+  run_freeipa_installer #for Debian
 
   run_syntax_check 
 
@@ -146,7 +146,7 @@ exec_container() {
 # due to debian is non-interactive but still --configure is triggered for freeipa as if in interactive mode
 run_freeipa_installer(){
   if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
-        exec_container "apt-get update && apt-get -y install freeipa-server" >> /dev/null
+        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-server" >> /dev/null
   fi
 }
 
