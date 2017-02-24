@@ -45,7 +45,7 @@ main() {
   start_container 
 
   # debug_facts
-  run_freeipa_installer #for Debian
+  # run_freeipa_installer #for Debian
 
   run_syntax_check 
 
