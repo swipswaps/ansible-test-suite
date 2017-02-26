@@ -31,7 +31,7 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(latest 2.2.0.0 2.1.0.0 2.0.0.0 1.9.6.0) 
+readonly ansible_versions=(latest 2.2.0.0 2.1.0.0 2.0.0.0) 
 ansible_version=latest 
 
 #}}}
@@ -141,7 +141,7 @@ exec_container() {
 
 # To fix idempotence in older ansible versions where timestamp is used
 set_ansible_cfg(){
-  exec_container "echo -e '\nansible_managed = Ansible managed, all changes will be lost' > /etc/ansible/ansible.cfg ".
+  exec_container "echo -e '\nansible_managed = Ansible managed, all changes will be lost' >> /etc/ansible/ansible.cfg ".
 }
 
 run_syntax_check() {
