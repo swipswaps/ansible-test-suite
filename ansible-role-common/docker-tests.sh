@@ -43,6 +43,8 @@ main() {
 
   start_container 
 
+  set_ansible_cfg
+
   # debug_facts
   run_syntax_check 
 
@@ -135,6 +137,11 @@ exec_container() {
     "${id}" \
     bash -c "${@}"
   set +x
+}
+
+# To fix idempotence in older ansible versions where timestamp is used
+set_ansible_cfg(){
+  exec_container "echo -e '\nansible_managed = Ansible managed, all changes will be lost' > /etc/ansible/ansible.cfg ".
 }
 
 run_syntax_check() {
