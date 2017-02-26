@@ -9,6 +9,13 @@ This test suite helps seggregate my role tests from fillingup the master/release
 
 You can use these tests as a guide for both writing tests for your roles and as documentation on how to use a specific role.
 
+### Test Cases
+
+The test suite currently contains tests for following ansible-roles
+
+- [ansible-role-common](https://github.com/yabhinav/ansible-role-common)
+- [ansible-role-ipaserver](https://github.com/yabhinav/ansible-role-ipaserver)
+- [ansible-role-ipaclient](https://github.com/yabhinav/ansible-role-ipaclient)
 
 ## Comparing real examples
 

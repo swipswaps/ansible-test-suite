@@ -32,8 +32,7 @@ run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
 readonly ansible_versions=(2.0.0.0 2.1.0.0 2.2.0.0 latest) 
-#latest #once block issue fixed with 2.2.1
-ansible_version=2.2.0.0 
+ansible_version=latest 
 
 #}}}
 
@@ -45,8 +44,6 @@ main() {
   start_container 
 
   # debug_facts
-  run_freeipa_installer #for Debian
-
   run_syntax_check 
 
   run_playbook 
@@ -56,8 +53,6 @@ main() {
   do
     run_idempotence_test 
   done
-
-  run_functional_test
 
 }
 
@@ -142,14 +137,6 @@ exec_container() {
   set +x
 }
 
-# FreeIPA has issue executing install over virtualenvwrapper
-# due to debian is non-interactive but still --configure is triggered for freeipa as if in interactive mode
-run_freeipa_installer(){
-  if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
-        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-server" >> /dev/null
-  fi
-}
-
 run_syntax_check() {
   log "Running syntax check on playbook"
   log "Working on ansible version : ${ansible_version}"
@@ -198,14 +185,6 @@ run_idempotence_test() {
   return "${return_status}"
 }
 
-run_functional_test() {
-  log "Running IPA server functional tests"
-  exec_container "ipactl status"
-  exec_container "ipa user-find admin"
-  exec_container "ipa user-add testlab --first=testlab --last=user "
-  exec_container "ipa user-show testlab"
-  exec_container "ipa user-del testlab"
-}
 
 cleanup() {
   log "Cleaning up"

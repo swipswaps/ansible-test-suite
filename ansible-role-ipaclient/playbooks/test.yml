@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: True
+  become: True
+
+  vars:
+    ipaserver_realm : "DEMO1.FREEIPA.ORG"
+    ipaserver_domain: "demo1.freeipa.org"  
+
+  roles:
+    - role_under_test

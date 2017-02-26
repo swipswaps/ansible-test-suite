@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 #
-# Credits : Bert Van Vreckem <bert.vanvreckem@gmail.com>
 # Author : Abhinav Y <https:yabhinav-github.com>
 #
 # Runs tests for this Ansible role on a Docker container
@@ -31,9 +30,8 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(2.0.0.0 2.1.0.0 2.2.0.0 latest) 
-#latest #once block issue fixed with 2.2.1
-ansible_version=2.2.0.0 
+readonly ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 latest) 
+ansible_version=latest
 
 #}}}
 
@@ -146,7 +144,7 @@ exec_container() {
 # due to debian is non-interactive but still --configure is triggered for freeipa as if in interactive mode
 run_freeipa_installer(){
   if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
-        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-server" >> /dev/null
+        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-client" >> /dev/null
   fi
 }
 
@@ -202,9 +200,9 @@ run_functional_test() {
   log "Running IPA server functional tests"
   exec_container "ipactl status"
   exec_container "ipa user-find admin"
-  exec_container "ipa user-add testlab --first=testlab --last=user "
   exec_container "ipa user-show testlab"
-  exec_container "ipa user-del testlab"
+  exec_container "getent passwd employee"
+  exec_container "getent group employees"
 }
 
 cleanup() {
