@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 #
-# Credits : Bert Van Vreckem <bert.vanvreckem@gmail.com>
 # Author : Abhinav Y <https:yabhinav-github.com>
 #
 # Runs tests for this Ansible role on a Docker container
@@ -23,6 +22,7 @@ IFS=$'\t\n'   # Split on newlines and tabs (but not on spaces)
 readonly container_id="$(mktemp)"
 readonly role_dir='/etc/ansible/roles/role_under_test'
 readonly test_playbook="${role_dir}/playbooks/test.yml"
+readonly role_install="${role_dir}/install_roles.yml"
 
 readonly docker_image="yabhinav/ansible"
 
@@ -31,9 +31,8 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(2.0.0.0 2.1.0.0 2.2.0.0 latest) 
-#latest #once block issue fixed with 2.2.1
-ansible_version=2.2.0.0 
+readonly ansible_versions=(latest 2.2.0.0 2.1.0.0 2.0.0.0) 
+ansible_version=latest
 
 #}}}
 
@@ -43,6 +42,9 @@ main() {
   configure_env
 
   start_container 
+
+  set_ansible_cfg
+  install_role_dependencies
 
   # debug_facts
   run_freeipa_installer #for Debian
@@ -146,8 +148,18 @@ exec_container() {
 # due to debian is non-interactive but still --configure is triggered for freeipa as if in interactive mode
 run_freeipa_installer(){
   if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
-        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-server" >> /dev/null
+        exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-client" >> /dev/null
   fi
+}
+
+# To fix idempotence in older ansible versions where timestamp is used
+set_ansible_cfg(){
+  exec_container "echo -e '\nansible_managed = Ansible managed, all changes will be lost' >> /etc/ansible/ansible.cfg "
+}
+
+install_role_dependencies(){
+  log "Installing Role dependencies from ansible-galaxy"
+  exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-galaxy install -r ${role_install}"
 }
 
 run_syntax_check() {
@@ -200,11 +212,13 @@ run_idempotence_test() {
 
 run_functional_test() {
   log "Running IPA server functional tests"
-  exec_container "ipactl status"
   exec_container "ipa user-find admin"
   exec_container "ipa user-add testlab --first=testlab --last=user "
   exec_container "ipa user-show testlab"
+  exec_container "getent passwd testlab"
+  exec_container "getent group testlab"
   exec_container "ipa user-del testlab"
+  log "Functional Tests successfull"
 }
 
 cleanup() {

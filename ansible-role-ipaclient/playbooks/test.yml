@@ -9,3 +9,10 @@
 
   roles:
     - role_under_test
+
+  post_tasks:
+    # Making Sure TGT is available for next steps (functional tests)
+    - name: Post Task - Kinit IPA Admin
+      script: kinit.exp {{ ipaserver_admin_username }} {{ ipaserver_admin_password }} {{ ipaserver_realm }}
+      become: True
+      changed_when: False

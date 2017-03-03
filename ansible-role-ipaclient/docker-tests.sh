@@ -31,7 +31,7 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(1.9.6.0 2.0.0.0 2.1.0.0 2.2.0.0 latest) 
+readonly ansible_versions=(latest 2.2.0.0 2.1.0.0 2.0.0.0) 
 ansible_version=latest
 
 #}}}
@@ -212,11 +212,13 @@ run_idempotence_test() {
 
 run_functional_test() {
   log "Running IPA server functional tests"
-  exec_container "ipactl status"
   exec_container "ipa user-find admin"
+  exec_container "ipa user-add testlab --first=testlab --last=user "
   exec_container "ipa user-show testlab"
-  exec_container "getent passwd employee"
-  exec_container "getent group employees"
+  exec_container "getent passwd testlab"
+  exec_container "getent group testlab"
+  exec_container "ipa user-del testlab"
+  log "Functional Tests successfull"
 }
 
 cleanup() {
