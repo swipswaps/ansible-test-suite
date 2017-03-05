@@ -207,11 +207,11 @@ run_idempotence_test() {
 run_functional_test() {
   log "Running IPA server functional tests"
   exec_container "ipa user-find admin"
-  exec_container "ipa user-add testlab --first=testlab --last=user "
-  exec_container "ipa user-show testlab"
-  exec_container "getent passwd testlab"
-  exec_container "getent group testlab"
-  exec_container "ipa user-del testlab"
+  exec_container "ipa user-add testlab-${distribution}${version} --first=testlab --last=${distribution}${version} "
+  exec_container "ipa user-show testlab-${distribution}${version}"
+  exec_container "getent passwd testlab-${distribution}${version}"
+  exec_container "getent group testlab-${distribution}${version}"
+  exec_container "ipa user-del testlab-${distribution}${version}"
   log "Functional Tests successfull"
 }
 
