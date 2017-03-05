@@ -43,7 +43,6 @@ main() {
 
   start_container 
 
-  set_ansible_cfg
   install_role_dependencies
 
   # debug_facts
@@ -150,11 +149,6 @@ run_freeipa_installer(){
   if [ "${distribution}" == "ubuntu" ] || [ "${distribution}" == "debian" ]; then
         exec_container "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install freeipa-client" >> /dev/null
   fi
-}
-
-# To fix idempotence in older ansible versions where timestamp is used
-set_ansible_cfg(){
-  exec_container "echo -e '\nansible_managed = Ansible managed, all changes will be lost' >> /etc/ansible/ansible.cfg "
 }
 
 install_role_dependencies(){
