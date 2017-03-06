@@ -33,7 +33,7 @@ run_opts=("--privileged")
 # Supported versions of ansible stable releases
 readonly ansible_versions=(2.0.0.0 2.1.0.0 2.2.0.0 latest) 
 # Will use latest #once block-issue fixed with 2.2.1
-ansible_version=latest
+ansible_version=2.2.0.0
 
 #}}}
 
