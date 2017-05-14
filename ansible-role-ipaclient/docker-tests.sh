@@ -159,12 +159,14 @@ install_role_dependencies(){
 run_syntax_check() {
   log "Running syntax check on playbook"
   log "Working on ansible version : ${ansible_version}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible --version"
   exec_container "source ~/.bashrc &&  workon ansible_${ansible_version} && ansible-playbook ${test_playbook} --syntax-check && deactivate ; (exit \$?)"
 }
 
 run_playbook() {
   log "Running playbook"
   log "Working on ansible version : ${ansible_version}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible --version"
   local output
   output="$(mktemp)"
   
@@ -186,6 +188,7 @@ run_playbook() {
 run_idempotence_test() {
   log "Running idempotence test"
   log "Working on ansible version : ${ansible_version}"
+  exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible --version"
   local output
   output="$(mktemp)"
 
