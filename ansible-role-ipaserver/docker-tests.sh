@@ -165,7 +165,7 @@ run_playbook() {
   
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
-  if grep -q 'changed=.*unreachable=0.*failed=0' "${output}"; then
+  if grep -q 'changed=.*unreachable=0.*failed=1' "${output}"; then
     result='pass'
     return_status=0
   else
