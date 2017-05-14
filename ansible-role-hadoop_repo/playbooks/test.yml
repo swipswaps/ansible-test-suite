@@ -28,7 +28,7 @@
       failed_when: hdp_version.stdout != '1'
       changed_when: False
       when: ansible_os_family == 'Debian'
-      with_items: ['2.5.0.3 Ambari', '2.6.0.3 HDP', 'HDP-UTILS-1.1.0.21']
+      with_items: ['2.5.0.3[/ ]*Ambari', '2.6.0.3[/ ]*HDP', 'HDP-UTILS-1.1.0.21']
       become: True
 
 
