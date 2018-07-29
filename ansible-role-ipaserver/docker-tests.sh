@@ -31,7 +31,7 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(latest 2.3.0.0 2.2.0.0 2.1.0.0 2.0.0.0) 
+readonly ansible_versions=(latest 2.6.0.0 2.5.0.0 2.4.0.0 2.3.0.0 2.2.0.0 2.1.0.0 2.0.0.0)
 ansible_version=latest
 
 #}}}
@@ -41,19 +41,19 @@ ansible_version=latest
 main() {
   configure_env
 
-  start_container 
+  start_container
 
   # debug_facts
   run_freeipa_installer #for Debian
 
-  run_syntax_check 
+  run_syntax_check
 
-  run_playbook 
+  run_playbook
 
   # Running Playbook on older stable ansible versions
   for ansible_version in "${ansible_versions[@]}"
   do
-    run_idempotence_test 
+    run_idempotence_test
   done
 
   run_functional_test
@@ -91,7 +91,7 @@ configure_env() {
 
 # Usage: build_container
 build_container() {
-  docker build --tag="${docker_image}:${distribution}${version}" 
+  docker build --tag="${docker_image}:${distribution}${version}"
 }
 
 start_container() {
@@ -162,7 +162,7 @@ run_playbook() {
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible --version"
   local output
   output="$(mktemp)"
-  
+
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
   if grep -q 'changed=.*unreachable=0.*failed=1' "${output}"; then
@@ -231,4 +231,4 @@ log() {
 
 #}}}
 
-main 
+main

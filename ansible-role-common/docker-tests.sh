@@ -31,8 +31,8 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(latest 2.3.0.0 2.2.0.0 2.1.0.0 2.0.0.0) 
-ansible_version=latest 
+readonly ansible_versions=(latest 2.6.0.0 2.5.0.0 2.4.0.0 2.3.0.0 2.2.0.0 2.1.0.0 2.0.0.0)
+ansible_version=latest
 
 #}}}
 
@@ -41,17 +41,17 @@ ansible_version=latest
 main() {
   configure_env
 
-  start_container 
+  start_container
 
   # debug_facts
-  run_syntax_check 
+  run_syntax_check
 
-  run_playbook 
+  run_playbook
 
   # Running Playbook on older stable ansible versions
   for ansible_version in "${ansible_versions[@]}"
   do
-    run_idempotence_test 
+    run_idempotence_test
   done
 
 }
@@ -82,18 +82,29 @@ configure_env() {
         run_opts+=('--volume=/sys/fs/selinux:/sys/fs/selinux:ro')
       fi
       ;;
+    'ubuntu18.04')
+      run_opts=('--volume=/run' '--volume=/run/lock' '--volume=/tmp' '--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro' '--cap-add=SYS_ADMIN' '--cap-add=SYS_RESOURCE')
+
+      if [ -x '/usr/sbin/getenforce' ]; then
+        run_opts+=('--volume=/sys/fs/selinux:/sys/fs/selinux:ro')
+      fi
+      init="/bin/bash"
+      ;;
+    'debian'*)
+      init="/bin/bash"
+      ;;
   esac
 }
 
 # Usage: build_container
 build_container() {
-  docker build --tag="${docker_image}:${distribution}${version}" 
+  docker build --tag="${docker_image}:${distribution}${version}"
 }
 
 start_container() {
   log "Starting container on image : ${docker_image}:${distribution}${version}"
   set -x
-  docker run --detach  \
+  docker run --detach -it \
     -h "testlab.example.com" \
     --volume="${PWD}:${role_dir}:ro" \
     "${run_opts[@]}" \
@@ -150,7 +161,7 @@ run_playbook() {
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible --version"
   local output
   output="$(mktemp)"
-  
+
   exec_container "source ~/.bashrc && workon ansible_${ansible_version} && ansible-playbook ${test_playbook} && deactivate ; (exit \$?)" 2>&1 | tee "${output}"
 
   if grep -q 'changed=.*unreachable=0.*failed=0' "${output}"; then
@@ -209,4 +220,4 @@ log() {
 
 #}}}
 
-main 
+main

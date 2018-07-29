@@ -2,11 +2,12 @@
 
 - hosts: all
   gather_facts: True
-  become: True  
+  become: True
 
+# @see https://docs.hortonworks.com/HDPDocuments/Ambari-2.6.0.0/bk_ambari-installation/content/hdp_26_repositories.html
   vars:
-    - hdp_release_version : '2.6.0.3'
-    - ambari_release_version: '2.5.0.3'
+    - hdp_release_version : '2.6.3.0'
+    - ambari_release_version: '2.6.0.0'
     - hdputil_release_version : '1.1.0.21'
 
   roles:
@@ -19,7 +20,7 @@
       failed_when: hdp_version.stdout != '1'
       changed_when: False
       when: ansible_os_family == 'RedHat'
-      with_items: ['Ambari-2.5.0.3', 'HDP-2.6.0.3', 'HDP-UTILS-1.1.0.21']
+      with_items: ['Ambari-2.6.0.0', 'HDP-2.6.3.0', 'HDP-UTILS-1.1.0.21']
       become: True
 
     - name: Check Package Versions
@@ -28,7 +29,5 @@
       failed_when: hdp_version.stdout == '0'
       changed_when: False
       when: ansible_os_family == 'Debian'
-      with_items: ['2.5.0.3[/ ]*Ambari', '2.6.0.3[/ ]*HDP', 'HDP-UTILS-1.1.0.21']
+      with_items: ['2.6.0.0[/ ]*Ambari', '2.6.3.0[/ ]*HDP', 'HDP-UTILS-1.1.0.21']
       become: True
-
-
