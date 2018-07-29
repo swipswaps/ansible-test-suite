@@ -31,7 +31,7 @@ init="/sbin/init"
 run_opts=("--privileged")
 
 # Supported versions of ansible stable releases
-readonly ansible_versions=(latest 2.6.0.0 2.5.0.0 2.4.0.0 2.3.0.0 2.2.0.0 2.1.0.0 2.0.0.0)
+readonly ansible_versions=(latest 2.6.0.0 2.5.0.0 2.4.0.0)
 ansible_version=latest
 
 #}}}
